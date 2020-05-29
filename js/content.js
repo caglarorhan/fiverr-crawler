@@ -8,14 +8,16 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             break;
         default:
             console.log(request.value);
-            m2p({action:'mToast', value:request.value})
             break;
 
     }
 });
 
 function m2p(outgoingMessage){
-    var port = chrome.runtime.connect({name:'cpConnection'});
+    chrome.runtime.sendMessage(outgoingMessage,(res)=>{
+        console.log(res);
+    });
+
 
 }
 
@@ -72,14 +74,14 @@ function returnMyJson(targetJSONurl,page){
                 -------------------------------------------------------------------
                 `);
                 o.gigs.forEach((title)=>{
-                    console.log(`
-                    Seller Name: ${title.seller_name}
-                    Seller Gig ID: ${title.gig_id}
-                    Seller Gig Created: ${title.gig_created}
-                    Seller Gig Updated: ${title.gig_updated}
-                    Price: ${title.price}
-                    ===================================
-                    `)
+                    let tit = {
+                        seller_name: title.seller_name,
+                        gig_id: title.gig_id,
+                        gig_created: title.gig_created,
+                        gig_updated: title.gig_updated,
+                        price: title.price
+                    };
+                    m2p({action:'crawlData', value:tit})
                 });
             //
             if(o.next_page===true){

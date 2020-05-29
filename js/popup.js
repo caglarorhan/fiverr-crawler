@@ -27,9 +27,7 @@ function totalLoad(){
         m2c({action:'runRequest', value:'crawlIt'})
     });
 
-document.querySelector('#test').addEventListener('click',()=>{
-    test('batlican')
-})
+
 // total load sonu
 }
 
@@ -55,11 +53,22 @@ function hideAllContainers(exceptThat){
         if(oView===exceptThat){document.querySelector("#"+oView).style.display='block';}else{document.querySelector("#"+oView).style.display='none';}
     })
 }
+/*
+                       seller_name: title.seller_name,
+                        gig_id: title.gig_id,
+                        gig_created: title.gig_created,
+                        gig_updated: title.gig_updated,
+                        price: title.price
+* */
 
+function crawlData2Container(data){
+    document.querySelector('#card-title').textContent = data.seller_name;
+    let otherInfo=``;
+    Object.entries(data).forEach((key,value)=>{
+        otherInfo+=`<div>${key}: ${value}</div>`;
+    });
+    document.querySelector('#card-info').innerHTML = otherInfo;
 
-
-function test(msg){
-    m2c({value:'Popup taraindan contente giden mesaj:'+msg})
 }
 
 
@@ -74,39 +83,14 @@ function m2c(messageToContentSide){
 }
 
 //Receiving message from the content side
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    switch (request.action) {
-        case 'runRequest':
-            console.log(request.value);
-            window[request.value]();
-            break;
-        case 'mToast':
-            M.Toast({html:request.value});
-            break;
-        default:
-            console.log(request.value);
-            break;
+chrome.runtime.onMessage.addListener((request,sender, sendResponse)=>{
 
+    switch(request.action){
+        case 'crawlData':
+            crawlData2Container(request.value);
+            break;
     }
-});
-////////////////////////////////////////
-////////////////////////////////////////
 
-//     var port = chrome.runtime.connect({name: "fC"});
-//     port.postMessage({joke: "Mesaj budur"});// extension tarafina mesaj gondermek icin
-// // gelen mesajlari yakalamak icin
-//     port.onMessage.addListener(function(msg) {
-//         // Gelen mesaj bu formatta msg.question == "Who's there?"
-//         // mesaj gonderme    port.postMessage({answer: "Madame"});
-//     });
-//
-//
-//
-//     chrome.runtime.onConnect.addListener(function(port) {
-//         console.assert(port.name === "fC");
-//         port.onMessage.addListener(function(msg) {
-//             //Gelen mesaj msg.joke == "Knock knock"
-//             //Gonderilen mesaj     port.postMessage({question: "Who's there?"})
-//         });
-//     });
-//
+});
+
+////////////////////////////////////////
