@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <link rel="stylesheet" href="./css/popup.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+</head>
+<body class="popup-body">
+
+<div class="container" style="width: 100%">
+
+    <nav>
+        <div class="nav-wrapper">
+            <span class="brand-logo fc-logo left-align" title="Welcome to FC!" data-view="welcomeScreenContainer">FC!</span>
+            <ul class="right" id="navUl">
+                <li title="Query Captured Data"><a href="#!" class="waves-effect waves-light black" id="queryCapturedDataButton" data-view="queryCapturedDataContainer"><i class="material-icons">search</i></a></li>
+                <li title="Go to Fiverr/Categories Page"><a href="#!" class="waves-effect waves-light yellow" id="gotoTargetUrlButton" data-view="targetUrlInfoContainer"><i class="material-icons">home</i></a></li>
+                <li title="Begin to crawl Fiverr"><a href="#!" class="waves-effect waves-light orange" id="crawlFiverrButton" data-view="crawlFiverrContainer"><i class="material-icons">cloud_download</i></a></li>
+                <li title="Settings"><a href="#!" class="waves-effect waves-light red" id="settingsButton" data-view="settingsContainer"><i class="material-icons">settings</i></a></li>
+
+            </ul>
+        </div>
+    </nav>
+
+
+
+    <div id="welcomeScreenContainer">
+        <div class="center">
+            <h4>Welcome to Fiverr-Crawler!</h4>
+            <img src="./img/fiverr-crawler_256.png" alt="Fiveer-Crawler">
+            <p>A week project.</p>
+
+        </div>
+    </div>
+
+
+    <div id="settingsContainer">
+        <div class="center">
+            <h4>Settings</h4>
+tes dugmesi, contentten geri donup mtoast mesaji vermeli
+            <a class="waves-effect waves-light btn-small" id="test">TEST</a>
+        </div>
+    </div>
+
+    <div id="queryCapturedDataContainer">
+        <div class="center">
+            <h4>Query Captured Data</h4>
+            <form id="queryForm">
+                <div class="row s12">
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">email</i>
+                        <input type="email" id="registered-email" required>
+                        <label for="registered-email">Email address</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">subject</i>
+                        <input type="text" id="subject" required>
+                        <label for="subject">Search subject</label>
+                    </div>
+                </div>
+                <div class="row s12">
+                    <div class="col s6">
+
+                    </div>
+                    <div class="col s6">
+
+                    </div>
+                </div>
+                <div class="row s12">
+                    <div class="col s6">
+
+                    </div>
+                    <div class="col s6">
+
+                    </div>
+                </div>
+                <div class="row s12">
+                    <div class="col s6">
+
+                    </div>
+                    <div class="col s6">
+
+                    </div>
+                </div>
+                <div class="row s12">
+                    <div class="col s6">
+
+                    </div>
+                    <div class="col s6">
+                        <a class="waves-effect waves-light btn-small">SEARCH</a>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <div id="targetUrlInfoContainer">
+        <div>
+            <h4 class="center">Target URL Container</h4>
+            <p class="flow-text">To avoid CORS problems it will be better to stay on the target url page.</p>
+        </div>
+    </div>
+
+
+    <div id="crawlFiverrContainer">
+        <div class="center">
+            <h4>Crawl Process Info</h4>
+        </div>
+    </div>
+
+    <div id="helpContainer">
+        <div class="center">
+            <h4>Help & FAQ</h4>
+        </div>
+    </div>
+
+
+
+
+    <div class = "footer-copyright">
+        <div class = "container">
+            <span style="float: left">© 2020 </span>
+            <a href="#!" class="waves-effect waves-light" style="color:white !important;" data-view="helpContainer" title="FAQ"><i class="tiny material-icons">live_help</i></a>
+            <span style="float:right" title="https://www.flaticon.com/authors/pixelmeetup">Spider icons by <a style="color: white" href="https://www.flaticon.com/authors/pixelmeetup">PixelMeetup</a></span>
+        </div>
+    </div>
+
+<script src="./js/materialize.min.js"></script>
+<script src="./js/popup.js"></script>
+</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "name": "Fiverr-Crawler",
+  "description" : "Fiverr Crawler",
+  "version": "2020.0.1",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_title": "Fiverr-Crawler",
+    "default_icon": "./img/fiverr-crawler_16.png"
+  },
+  "icons": {
+    "16": "./img/fiverr-crawler_16.png",
+    "32": "./img/fiverr-crawler_32.png",
+    "64": "./img/fiverr-crawler_64.png",
+    "128": "./img/fiverr-crawler_128.png",
+    "256": "./img/fiverr-crawler_256.png"
+  },
+  "background" : {
+    "scripts" : ["./js/hot-reload.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.fiverr.com/*",
+        "https://www.fiverr.com/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "./js/content.js"
+      ],
+      "css": [
+        "./css/popup.css",
+        "./css/content.css"
+      ],
+      "match_about_blank": true
+    }
+  ],
+  "permissions": ["tabs"]
+}
