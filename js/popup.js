@@ -27,14 +27,20 @@ function totalLoad(){
 
     // Begin to crawl
     document.querySelector('#beginToCrawlButton').addEventListener('click',()=>{
+        M.toast({html:'Crawl process is beginning...'});
         document.querySelector('#crawlingProggressBar').style.display='block';
-        m2c({action:'runRequest', value:'crawlIt'})
+        m2c({action:'runRequest', value:'crawlIt'});
+        document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
+        document.querySelector('#stopCrawlingButton').classList.toggle('disabled');
     });
 
     //Stop crawling
     document.querySelector('#stopCrawlingButton').addEventListener('click',()=>{
+        M.toast({html:'Qutting from crawl process...'});
         document.querySelector('#crawlingProggressBar').style.display='none';
-        m2c({action:'runRequest', value:'stopCrawling'})
+        m2c({action:'runRequest', value:'stopCrawling'});
+        document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
+        document.querySelector('#stopCrawlingButton').classList.toggle('disabled');
     })
 
 // total load sonu
@@ -97,6 +103,9 @@ chrome.runtime.onMessage.addListener((request,sender, sendResponse)=>{
     switch(request.action){
         case 'crawlData':
             crawlData2Container(request.value);
+            break;
+        default:
+            M.toast({html:`<b>${request.value}</b>`})
             break;
     }
 

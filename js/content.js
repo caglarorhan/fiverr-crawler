@@ -1,5 +1,6 @@
 console.log('Fiverr-Crawler comes...');
 const failedURLz = [];
+const crawlStatusOrder = {continue:true};
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     switch (request.action) {
         case 'runRequest':
@@ -21,9 +22,13 @@ function m2p(outgoingMessage){
 
 }
 
+function stopCrawling(){
+    crawlStatusOrder.continue=false;
+}
+
 
 window.crawlIt = async function() {
-    //m2p({action:'mToast', value:'Crawling...'})
+    crawlStatusOrder.continue=true;
     let fC = await getCategories();
     console.log('Category list handled as an array properly.');
     //console.log(fC.toString())
@@ -31,6 +36,12 @@ window.crawlIt = async function() {
     let fCi = 0;
 
     for (url2ndPart of fC) {
+        if(!crawlStatusOrder.continue){
+            let quittingMessage =`Continuing process is about to complete, once done will quit!`;
+            console.log(quittingMessage);
+            m2p({value:quittingMessage})
+            break;
+        }
         let jsonJob = await getJSON('https://www.fiverr.com/categories/' + url2ndPart);
         console.log(`${url2ndPart} json dosyasi ${jsonJob}`);
     }
@@ -105,9 +116,7 @@ function returnMyJson(targetJSONurl,page){
 
 
 
-function stopCrawling(){
 
-}
 
 
 
