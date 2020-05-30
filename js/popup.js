@@ -11,6 +11,8 @@ totalLoad();
 
 
 function totalLoad(){
+    let settingsTabUl = document.querySelector('.tabs');
+    let settingsTab = M.Tabs.init(settingsTabUl);
     // menu container match process
     hideAllContainers('welcomeScreenContainer');
 
@@ -23,10 +25,10 @@ function totalLoad(){
     // Check and redirect to target url
     document.querySelector('#gotoTargetUrlButton').addEventListener('click',getmeToTheCurrentURL);
 
-    document.querySelector('#crawlFiverrButton').addEventListener('click',()=>{
+    // Begin to crawl
+    document.querySelector('#beginToCrawlButton').addEventListener('click',()=>{
         m2c({action:'runRequest', value:'crawlIt'})
-    });
-
+    })
 
 // total load sonu
 }
@@ -64,8 +66,8 @@ function hideAllContainers(exceptThat){
 function crawlData2Container(data){
     document.querySelector('#card-title').textContent = data.seller_name;
     let otherInfo=``;
-    Object.entries(data).forEach((key,value)=>{
-        otherInfo+=`<div>${key}: ${value}</div>`;
+    Object.entries(data).forEach((entry)=>{
+        otherInfo+=`<div>${entry[0]}: ${entry[1]}</div>`;
     });
     document.querySelector('#card-info').innerHTML = otherInfo;
 
