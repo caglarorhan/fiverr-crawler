@@ -105,7 +105,9 @@ function returnMyJson(targetJSONurl,page){
 
 
 
+function stopCrawling(){
 
+}
 
 
 

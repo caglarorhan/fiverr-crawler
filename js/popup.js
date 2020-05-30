@@ -27,7 +27,14 @@ function totalLoad(){
 
     // Begin to crawl
     document.querySelector('#beginToCrawlButton').addEventListener('click',()=>{
+        document.querySelector('#crawlingProggressBar').style.display='block';
         m2c({action:'runRequest', value:'crawlIt'})
+    });
+
+    //Stop crawling
+    document.querySelector('#stopCrawlingButton').addEventListener('click',()=>{
+        document.querySelector('#crawlingProggressBar').style.display='none';
+        m2c({action:'runRequest', value:'stopCrawling'})
     })
 
 // total load sonu
