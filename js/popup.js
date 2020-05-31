@@ -1,16 +1,48 @@
+//////////////////////////////////////////////////////////////////////////////
 const state = {};
+const locSt = window.localStorage;
+const fF = {};
 const minutesNow = Math.floor(new Date().getTime() / 60000);
 state['tabData']='';
 state['viewList'] = ['welcomeScreenContainer','queryCapturedDataContainer','settingsContainer','targetUrlInfoContainer','crawlFiverrContainer','helpContainer'];
 state['failedURLz']=[];
 state['crawlStatusOrder']={continue:true};
 state['freshCategories']={refreshDate:minutesNow, categoryList:[]};
+state['firebaseConfig'] = {};
+
+
+//if firebaseconfig is already saved local retrieve it and set the state. Also, write it to the textarea
+if(locSt.getItem('firebaseConfig')){
+    stateModifier({firebaseConfig:locSt.getItem('firebaseConfig')});
+    document.querySelector('#firebaseConfig').value = state.firebaseConfig;
+    firebase.initializeApp(state.firebaseConfig);
+    fF.db = firebase.firestore();
+}else{
+    M.toast({html:`You should save firebase config credentials first!`});
+}
+
+
+
+
 
 window.addEventListener('load',()=>{
 totalLoad();
-
 });
 
+
+function saveGigToFireStore(gG){
+    if(!fF.db){
+        M.toast({html:`Firebase db couldn't initiate!`});
+        return false;
+    }
+    fF.db.collection("gigs").add(gG)
+        .then(function() {
+            document.querySelector('#acknowledgeOfTitleSave').textContent=`Saved to the firebase!`;
+        })
+        .catch(function(error) {
+            document.querySelector('#acknowledgeOfTitleSave').textContent=`Error:${error}`;
+        });
+}
 
 
 function totalLoad(){
@@ -18,6 +50,8 @@ function totalLoad(){
     let settingsTab = M.Tabs.init(settingsTabUl);
     // menu container match process
     hideAllContainers('welcomeScreenContainer');
+
+
 
     document.querySelectorAll("[data-view]").forEach(item=>{
         item.addEventListener('click',()=>{
@@ -30,7 +64,7 @@ function totalLoad(){
 
     // Begin to crawl
     document.querySelector('#beginToCrawlButton').addEventListener('click',()=>{
-        M.toast({html:'Crawl process is begins!'});
+        M.toast({html:'Crawl process will begin shortly!'});
         document.querySelector('#crawlingProggressBar').style.display='block';
         let crawling = crawlIt();
         document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
@@ -44,6 +78,14 @@ function totalLoad(){
         state.crawlStatusOrder.continue=false;
         document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
         document.querySelector('#stopCrawlingButton').classList.toggle('disabled');
+    });
+
+    //firebaseConfigSaveButton
+    document.querySelector('#firebaseConfigSaveButton').addEventListener('click', ()=>{
+        const fbC = document.querySelector('#firebaseConfig').value;
+        //controller may attached to check if config file is good to go
+        locSt.setItem('firebaseConfig',fbC);
+        stateModifier({firebaseConfig:fbC})
     })
 
 // total load sonu
@@ -51,8 +93,9 @@ function totalLoad(){
 
 
 function getmeToTheCurrentURL(){
+
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-        m2c({value:`Current url is: ${tabs[0].url.toString()}`});
+           m2c({value:`Current url is: ${tabs[0].url.toString()}`});
         if(tabs[0].url.toString()==='https://www.fiverr.com/categories'){
             M.toast({html: 'You are already there, crawl it with the <i class="material-icons">cloud_download</i>icon on the menu!'});
         }else{
@@ -77,7 +120,7 @@ function crawlData2Container(data){
     document.querySelector('#card-title').textContent = data.seller_name;
     let otherInfo=``;
     Object.entries(data).forEach((entry)=>{
-        otherInfo+=`<div>${entry[0]}: ${entry[1]}</div>`;
+        otherInfo+=`<div><b>${entry[0]}</b>: ${entry[1]}</div>`;
     });
     document.querySelector('#card-info').innerHTML = otherInfo;
 
@@ -85,11 +128,13 @@ function crawlData2Container(data){
 
 
 
+
+
 //Sending message to content side
 function m2c(messageToContentSide){
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, messageToContentSide, function (response) {
-            //('Mesaj yayinlandi') yani contente gitti
+
         });
     });
 }
@@ -109,6 +154,7 @@ chrome.runtime.onMessage.addListener((request,sender, sendResponse)=>{
             M.toast({html:`<b>${request.value}</b>`});
             break;
     }
+    return true;
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +162,7 @@ chrome.runtime.onMessage.addListener((request,sender, sendResponse)=>{
 function stateModifier(keyValueObject){
     Object.keys(keyValueObject).forEach((key)=>{
        state[key]=keyValueObject[key];
-        //M.toast({html:state[key].categoryList});
+        M.toast({html:'State is modified...'});
     });
 
 }
@@ -159,7 +205,6 @@ function getJSON(targetJSONurl){
 
 }
 
-
 function returnMyJson(targetJSONurl,page){
     let jsonRequest = fetch(targetJSONurl+'.json?page='+page);
     jsonRequest.then(response =>{
@@ -178,13 +223,10 @@ function returnMyJson(targetJSONurl,page){
                 -------------------------------------------------------------------
                 `);
             // FIREBASE
-            // db.collection('gigs').add(o.gigs).then((res)=>{
-            //     M.toast({html:res})
-            // })
-            //
+            //saveGigToFireStore(o.gigs);
             o.gigs.forEach((title)=>{
                 // insert title by title into firebase
-                //db.collection('messages').add();
+                if(fF.db){saveGigToFireStore(title)}
                 //------------------
                 let tit = {
                     seller_name: title.seller_name,
@@ -227,4 +269,5 @@ async function getCategories(){
 
 }
 //
+
 

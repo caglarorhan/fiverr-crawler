@@ -4,7 +4,7 @@
   "version": "2020.0.1",
   "manifest_version": 2,
   "browser_action": {
-    "default_popup": "index.html",
+    "default_popup": "popup.html",
     "default_title": "Fiverr-Crawler",
     "default_icon": "./img/fiverr-crawler_16.png"
   },
@@ -41,28 +41,19 @@
     "activeTab",
     "tabs",
     "geolocation",
-    "https://*.heb.com/*",
-    "https://*.target.com/*",
-    "https://*.costco.com/*",
-    "https://*.walmart.com/*",
-    "*://*.shuppman.com/*",
     "https://*.gstatic.com/*",
     "https://www.googletagmanager.com/gtag/js?l=dataLayer",
     "https://*.googleapis.com/*",
-    "https://maps.googleapis.com/maps/api/js",
-    "https://maps.google.com/*",
-    "https://maps.googleapis.com/*"
+    "https://maps.googleapis.com/maps/api/js"
   ],
   "web_accessible_resources": [
     "./js/content.js",
     "./css/content.css",
     "./js/firebase-app.js",
-    "./js/firebase-auth.js",
-    "./js/firebase-firestore.js",
-    "./js/firebase-analytics.js",
     "https://www.googletagmanager.com/gtag/js?l=dataLayer",
     "https://*.googleapis.com/*",
-    "https://maps.googleapis.com/maps/api/js"
+    "https://maps.googleapis.com/maps/api/js",
+    "https://www.gstatic.com/*"
   ],
-  "content_security_policy": "script-src 'self' https://www.googletagmanager.com/gtag/js https://maps.googleapis.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.gstatic.com; object-src 'self';"
 }

@@ -1,3 +1,4 @@
+
 //Sending message to popup side
 function m2p(outgoingMessage){
     chrome.runtime.sendMessage(outgoingMessage,(res)=>{
@@ -5,7 +6,7 @@ function m2p(outgoingMessage){
     });
 }
 //AND Listener
-chrome.runtime.onMessage.addListener( (request, sender, sendResponse)=>{
+chrome.runtime.onMessage.addListener(  (request,sender, sendResponse)=>{
     switch (request.action) {
         case 'runRequest':
             if(request.callBack){
@@ -16,6 +17,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse)=>{
             console.log(request.value);
             break;
     }
+    return true;
 });
 
 

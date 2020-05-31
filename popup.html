@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <title>FC!</title>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
@@ -44,7 +45,7 @@
             <div class="col s12">
                 <ul class="tabs">
                     <li class="tab col s3"><a href="#dataTrackingSettings" class="active">Data Tracking</a></li>
-                    <li class="tab col s3"><a  href="#firebaseSettings">Firebase</a></li>
+                    <li class="tab col s3"><a  href="#firebaseSettings">Firebase Config</a></li>
                     <li class="tab col s3"><a href="#otherSettings">Other Settings</a></li>
                 </ul>
             </div>
@@ -67,8 +68,12 @@
             <div id="firebaseSettings" class="col s12">
                 <form action="" class="col s12">
                     <div class="input-field col s12">
-                        Please paste your firebase config script here
-                        <textarea name="" id="" cols="30" rows="50"></textarea>
+                        <textarea name="firebaseConfig" id="firebaseConfig" cols="30" style="height: 200px; font-size: medium"></textarea>
+                        <label for="firebaseConfig">Please paste your firebase config json (with border {curly brackets})</label>
+                    </div>
+                    <div class="col s12">
+                    <a class="waves-effect waves-light btn red" id="firebaseConfigSaveButton" title="Attention: this will overwrite old configs!">
+                        <i class="material-icons right">save</i>SAVE TO LOCAL</a>
                     </div>
                 </form>
             </div>
@@ -148,13 +153,17 @@
             </div>
             <div class="row" style="overflow-y: auto; height: 70%" id="crawlDataDiv">
                 <div class="col s12 m6">
-                    <div class="card blue-grey darken-1">
+                    <div class="card  purple darken-4">
                         <div class="card-content white-text">
-                            <span class="card-title" id="card-title">Card Title</span>
-                            <p id="card-info">I am a very simple card. I am good at containing small bits of information.
+                            <span class="card-title" id="card-title">Seller Nick</span>
+                            <p id="card-info" class="flow-text">I am a very simple card. I am good at containing small bits of information.
                                 I am convenient because I require little markup to use effectively.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12" id="acknowledgeOfTitleSave">
                 </div>
             </div>
             <div class="row">
@@ -178,6 +187,7 @@
     <div id="helpContainer">
         <div class="center">
             <h4>Help & FAQ</h4>
+            <button id="test">FIREBASE TEST</button>
         </div>
     </div>
 
@@ -192,15 +202,10 @@
         </div>
     </div>
 
-    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="./js/materialize.min.js"></script>
     <script src="./js/firebase-app.js"></script>
-    <script src="./js/firebase-auth.js"></script>
     <script src="./js/firebase-firestore.js"></script>
-    <script src="./js/firebase-analytics.js"></script>
-    <script src="./js/firebase-conf.js"></script>
-
-<script src="./js/materialize.min.js"></script>
-<script src="./js/popup.js"></script>
+    <script src="./js/popup.js"></script>
 </div>
 </body>
 </html>
