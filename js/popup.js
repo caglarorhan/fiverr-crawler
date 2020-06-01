@@ -13,10 +13,24 @@ state['firebaseConfig'] = {};
 
 //if firebaseconfig is already saved local retrieve it and set the state. Also, write it to the textarea
 if(locSt.getItem('firebaseConfig')){
-    stateModifier({firebaseConfig:locSt.getItem('firebaseConfig')});
-    document.querySelector('#firebaseConfig').value = state.firebaseConfig;
-    firebase.initializeApp(state.firebaseConfig);
+    const confObj = {};
+    let fbC = locSt.getItem('firebaseConfig');
+    //----------------------------------------------
+    fbC = fbC.replace(/\s/g,'');
+    if(fbC[0]==='{'){fbC = fbC.substring(1,fbC.length-1)}
+    if(fbC[fbC.length-1]==="}"){fbC = fbC.substring(0,fbC.length-2)}
+    //m2c({value:fbC});
+    fbC.split(',').forEach((entry)=>{
+       let keyVal = entry.split(":");
+       confObj[keyVal[0]] = keyVal[1];
+    });
+    //-----------------------------------------------
+    state.firebaseConfig = confObj; //set state property  again
+    //m2c({value:state.firebaseConfig});
+    document.querySelector('#firebaseConfig').value = locSt.getItem('firebaseConfig');
+    firebase.initializeApp(state.firebaseConfig); //init firebase with these configs
     fF.db = firebase.firestore();
+    M.toast({html:'Firebase connection succeed!'})
 }else{
     M.toast({html:`You should save firebase config credentials first!`});
 }
@@ -82,10 +96,9 @@ function totalLoad(){
 
     //firebaseConfigSaveButton
     document.querySelector('#firebaseConfigSaveButton').addEventListener('click', ()=>{
-        const fbC = document.querySelector('#firebaseConfig').value;
-        //controller may attached to check if config file is good to go
-        locSt.setItem('firebaseConfig',fbC);
-        stateModifier({firebaseConfig:fbC})
+        let confText = document.querySelector('#firebaseConfig').value;
+        locSt.setItem('firebaseConfig',confText);
+        M.toast({html:'Firebase configuration text saved into localStorage!'})
     })
 
 // total load sonu
@@ -218,10 +231,10 @@ function returnMyJson(targetJSONurl,page){
         let res = response.json();
         res.then((o)=>{
             //istenilen veriler o altinda yeraliyor
-            console.log(`
+            m2c({value:`
                 Bu categorideki teorik  sayfa sayisi: ${o.pagination.number_of_pages}
                 -------------------------------------------------------------------
-                `);
+                `});
             // FIREBASE
             //saveGigToFireStore(o.gigs);
             o.gigs.forEach((title)=>{
@@ -239,12 +252,13 @@ function returnMyJson(targetJSONurl,page){
             });
             //
             if(o.next_page===true){
-                return new Promise((res,rej)=>{
-                    window.setTimeout(()=>{
-                        res(true);
-                    },2500)
+                 return new Promise((res,rej)=>{
+                         window.setTimeout(()=>{
+                             res(true);
+                         },2500)
 
-                });
+                     })
+
             }else{
                 return new Promise((res,rej)=>{
                     res(false);
