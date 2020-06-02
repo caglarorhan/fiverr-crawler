@@ -1,11 +1,11 @@
 {
-  "name": "Fiverr-Crawler",
-  "description" : "Fiverr Crawler",
+  "name": "F!Crawler",
+  "description" : "F!Crawler",
   "version": "2020.0.1",
   "manifest_version": 2,
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "Fiverr-Crawler",
+    "default_title": "F!Crawler",
     "default_icon": "./img/fiverr-crawler_16.png"
   },
   "icons": {

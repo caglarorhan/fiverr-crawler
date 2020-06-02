@@ -4,7 +4,7 @@ const locSt = window.localStorage;
 const fF = {};
 const minutesNow = Math.floor(new Date().getTime() / 60000);
 state['tabData']='';
-state['viewList'] = ['welcomeScreenContainer','queryCapturedDataContainer','settingsContainer','targetUrlInfoContainer','crawlFiverrContainer','helpContainer'];
+state['viewList'] = {};
 state['failedURLz']=[];
 state['crawlStatusOrder']={continue:true};
 state['freshCategories']={refreshDate:minutesNow, categoryList:[]};
@@ -19,14 +19,14 @@ if(locSt.getItem('firebaseConfig')){
     fbC = fbC.replace(/\s/g,'');
     if(fbC[0]==='{'){fbC = fbC.substring(1,fbC.length-1)}
     if(fbC[fbC.length-1]==="}"){fbC = fbC.substring(0,fbC.length-2)}
-    //m2c({value:fbC});
     fbC.split(',').forEach((entry)=>{
-       let keyVal = entry.split(":");
-       confObj[keyVal[0]] = keyVal[1];
+       let keyVal = entry.split(':');
+       confObj[keyVal[0]] = entry.replace(keyVal[0]+':','').replace(/"/g, "");
     });
     //-----------------------------------------------
     state.firebaseConfig = confObj; //set state property  again
-    //m2c({value:state.firebaseConfig});
+    m2c({value:state.firebaseConfig});
+
     document.querySelector('#firebaseConfig').value = locSt.getItem('firebaseConfig');
     firebase.initializeApp(state.firebaseConfig); //init firebase with these configs
     fF.db = firebase.firestore();
@@ -35,9 +35,17 @@ if(locSt.getItem('firebaseConfig')){
     M.toast({html:`You should save firebase config credentials first!`});
 }
 
+function checkFirebaseConnection(){
+    if(!fF.db){
+        state.firebaseConfig.continue =false;
+        return false;
+    }else{
+        return true;
+    }
+}
 
 
-
+m2c({value:checkFirebaseConnection()});
 
 window.addEventListener('load',()=>{
 totalLoad();
@@ -45,16 +53,18 @@ totalLoad();
 
 
 function saveGigToFireStore(gG){
-    if(!fF.db){
-        M.toast({html:`Firebase db couldn't initiate!`});
+    if(!checkFirebaseConnection()){
+        M.toast({html:`Firebase db couldn't initiate! Quitting`});
+        state.firebaseConfig.continue =false;
         return false;
     }
-    fF.db.collection("gigs").add(gG)
+    fF.db.collection('gigs').add(gG)
         .then(function() {
-            document.querySelector('#acknowledgeOfTitleSave').textContent=`Saved to the firebase!`;
+            document.querySelector('#savingInfo').textContent=`Saved!`; //savingInfo
         })
         .catch(function(error) {
-            document.querySelector('#acknowledgeOfTitleSave').textContent=`Error:${error}`;
+            document.querySelector('#savingInfo').textContent=`Error!`;
+            m2c({value:`Error happened: ${error}`})
         });
 }
 
@@ -62,16 +72,16 @@ function saveGigToFireStore(gG){
 function totalLoad(){
     let settingsTabUl = document.querySelector('.tabs');
     let settingsTab = M.Tabs.init(settingsTabUl);
-    // menu container match process
-    hideAllContainers('welcomeScreenContainer');
-
-
 
     document.querySelectorAll("[data-view]").forEach(item=>{
+        state['viewList'][item.dataset.view]=item.dataset.caption;
         item.addEventListener('click',()=>{
             hideAllContainers(item.dataset.view);
         })
     });
+    //m2c({value:state.viewList});
+    hideAllContainers('welcomeScreenContainer');
+
 
     // Check and redirect to target url
     document.querySelector('#gotoTargetUrlButton').addEventListener('click',getmeToTheCurrentURL);
@@ -106,7 +116,6 @@ function totalLoad(){
 
 
 function getmeToTheCurrentURL(){
-
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
            m2c({value:`Current url is: ${tabs[0].url.toString()}`});
         if(tabs[0].url.toString()==='https://www.fiverr.com/categories'){
@@ -123,9 +132,14 @@ function getmeToTheCurrentURL(){
 
 function hideAllContainers(exceptThat){
     let viewNames = state['viewList'];
-    viewNames.forEach((oView)=>{
-        if(oView===exceptThat){document.querySelector("#"+oView).style.display='block';}else{document.querySelector("#"+oView).style.display='none';}
-    })
+        Object.keys(viewNames).forEach((key)=>{
+            if(key===exceptThat){
+                document.querySelector("#"+key).style.display='block';
+                document.querySelector('#currentPageCaption').textContent=viewNames[key];
+            }else{
+                document.querySelector("#"+key).style.display='none';
+            }
+    });
 }
 
 
@@ -182,12 +196,14 @@ function stateModifier(keyValueObject){
 
 
 const crawlIt = async function() {
+    if(!checkFirebaseConnection()){return false;}
     state.crawlStatusOrder.continue=true;
     let fC = await getCategories();
     let cFL = fC.length;
     let fCi = 0;
 
     for (url2ndPart of fC) {
+        if(!checkFirebaseConnection()){return false}
         if(!state.crawlStatusOrder.continue){
             let quittingMessage =`Continuing process is about to complete, once done will quit!`;
             m2c({value:quittingMessage});
@@ -200,74 +216,67 @@ const crawlIt = async function() {
 
 };
 // Hedef json sayfasindan seller verilerini ceken kisim
+
 function getJSON(targetJSONurl){
 
-    return new Promise(async (resolve,reject)=>{
+    return new Promise(async (resolve)=>{
         //--------------------------------------------
-        for(let page=1; page<500;){
-            let donen = await returnMyJson(targetJSONurl, page)
-            if(!donen){break}else{page++}
+        for(let page=1; page<500;page++){
+            let donen = await returnMyJson(targetJSONurl, page);
+            //m2c({value:`Donen durum:${donen}`});
+            if(!state.crawlStatusOrder.continue){break;}
+               if(!donen){break}
         }
+
+
         window.setTimeout(()=>{
             resolve('tamamdir')
-        },2700)
+        },3500)
 
         //-------------------------------------------------------
     })
-
-
 }
 
-function returnMyJson(targetJSONurl,page){
-    let jsonRequest = fetch(targetJSONurl+'.json?page='+page);
-    jsonRequest.then(response =>{
-        if (response.status !== 200) {
-            m2c({value:`Looks like there was a problem. Status Code: ${response.status}`});
-            state['failedURLz'].push(targetJSONurl);
-            return new Promise((res,rej)=>{
-                res(false);
-            });
-        }
-        let res = response.json();
-        res.then((o)=>{
-            //istenilen veriler o altinda yeraliyor
-            m2c({value:`
-                Bu categorideki teorik  sayfa sayisi: ${o.pagination.number_of_pages}
-                -------------------------------------------------------------------
-                `});
-            // FIREBASE
-            //saveGigToFireStore(o.gigs);
-            o.gigs.forEach((title)=>{
-                // insert title by title into firebase
-                if(fF.db){saveGigToFireStore(title)}
-                //------------------
-                let tit = {
-                    seller_name: title.seller_name,
-                    gig_id: title.gig_id,
-                    gig_created: title.gig_created,
-                    gig_updated: title.gig_updated,
-                    price: title.price
-                };
-                crawlData2Container(tit);
-            });
-            //
-            if(o.next_page===true){
-                 return new Promise((res,rej)=>{
-                         window.setTimeout(()=>{
-                             res(true);
-                         },2500)
+async function returnMyJson(targetJSONurl,page){
+    let response = await fetch(targetJSONurl+'.json?page='+page);
+    let jsonData = await response.json();
+    //m2c({value:jsonData});
 
-                     })
+        if (response.status !== 200) { state['failedURLz'].push(targetJSONurl); return new Promise(res=>{res(false)});}
 
-            }else{
-                return new Promise((res,rej)=>{
-                    res(false);
-                });
-            }
-        })
+
+    jsonData.gigs.forEach((title)=>{
+        // FIREBASE
+        saveGigToFireStore(title);
+        //m2c({value:title});
+        let tit = {
+            seller_name: title.seller_name,
+            gig_id: title.gig_id,
+            gig_created: title.gig_created,
+            gig_updated: title.gig_updated,
+            price: title.price,
+            url: targetJSONurl,
+            page: page
+        };
+        crawlData2Container(tit);
     });
-    jsonRequest.catch((e)=>{m2c({value:e})});
+    //
+    if(jsonData.next_page){
+        return new Promise((res)=>{
+            window.setTimeout(()=>{
+                res(true);
+            },2000)
+        })
+    }else{
+        return new Promise((res)=>{
+            res(false);
+        });
+    }
 }
+
+
+
+
 
 
 
@@ -279,8 +288,6 @@ async function getCategories(){
             resolve(state.freshCategories.categoryList);
             },4000);
     });
-
-
 }
 //
 
