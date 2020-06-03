@@ -43,7 +43,7 @@
     <div id="settingsContainer">
         <div class="row">
             <div class="col s12">
-                <ul class="tabs">
+                <ul class="tabs" id="settingTabs">
                     <li class="tab col s3"><a href="#dataTrackingSettings" class="active">Data Tracking</a></li>
                     <li class="tab col s3"><a  href="#firebaseSettings">Firebase Config</a></li>
                     <li class="tab col s3"><a href="#otherSettings">Other Settings</a></li>
@@ -82,77 +82,141 @@
     </div>
 
     <div id="queryCapturedDataContainer">
-        <div class="center">
-            <form id="queryForm">
-                <div class="row s12">
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">email</i>
-                        <input type="email" id="registered-email" required>
-                        <label for="registered-email">Email address</label>
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs" id="queryTabs">
+                    <li class="tab col s3"><a href="#filterForm" class="active">Filter Form</a></li>
+                    <li class="tab col s3"><a  href="#filterResults">Filter Results</a></li>
+                    <li class="tab col s3"><a href="#reportSection">Reports Section</a></li>
+                </ul>
+            </div>
+            <div id="filterForm" class="col s12">
+                <form action="" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <input id="filter_seller_name" type="text">
+                            <label for="filter_seller_name">Seller Name</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="filter_seller_id" type="text">
+                            <label for="filter_seller_id">Seller ID</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="filter_seller_min_avg_rating" type="text">
+                            <label for="filter_seller_min_avg_rating">Min Avg Rating</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="filter_seller_min_rated_orders" type="text">
+                            <label for="filter_seller_min_rated_orders">Min Rated Orders</label>
+                        </div>
                     </div>
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">subject</i>
-                        <input type="text" id="subject" required>
-                        <label for="subject">Search subject</label>
-                    </div>
-                </div>
-                <div class="row s12">
-                    <div class="col s6">
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <input type="text" class="datepicker" id="filter_gig_created_start">
+                            <label for="filter_gig_created_start">Gig created_S</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input type="text" class="datepicker" id="filter_gig_created_finish">
+                            <label for="filter_gig_created_finish">Gig created_F</label>
+                        </div>
 
+                        <div class="input-field col s3">
+                            <input type="text" class="datepicker" id="filter_gig_updated_start">
+                            <label for="filter_gig_updated_start">Gig updated_S</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input type="text" class="datepicker" id="filter_gig_updated_finish">
+                            <label for="filter_gig_updated_finish">Gig updated_F</label>
+                        </div>
                     </div>
-                    <div class="col s6">
-
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input id="filter_title" type="text">
+                            <label for="filter_title">Title</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <input id="filter_price" type="text">
+                            <label for="filter_price">Price($)</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <select id="filter_seller_country">
+                                <option value="" selected>Seller Country</option>
+                                <label for="filter_seller_country">Seller Country</label>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="row s12">
-                    <div class="col s6">
-
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <label>
+                                <input type="checkbox" class="filter_status" checked="checked" />
+                                <span>isApproved?</span>
+                            </label>
+                        </div>
+                        <div class="input-field col s3">
+                            <label>
+                                <input type="checkbox" class="filter_status" checked="checked" />
+                                <span>isFutured?</span>
+                            </label>
+                        </div>
+                        <div class="input-field col s3">
+                            <label>
+                                <input type="checkbox" class="filter_status" checked="checked" />
+                                <span>isPro?</span>
+                            </label>
+                        </div>
+                        <div class="input-field col s3">
+                            <label>
+                                <input type="checkbox" class="filter_status" checked="checked" />
+                                <span>isNew?</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="col s6">
+                </form>
 
-                    </div>
-                </div>
-                <div class="row s12">
-                    <div class="col s6">
-
-                    </div>
-                    <div class="col s6">
-
-                    </div>
-                </div>
-                <div class="row s12">
-                    <div class="col s6">
-
-                    </div>
-                    <div class="col s6">
-                        <a class="waves-effect waves-light btn-small">SEARCH</a>
-                    </div>
-                </div>
-
-            </form>
-
+            </div>
+            <div id="filterResults" class="col s12">
+                <ul class="pagination">
+                    <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                    <li class="active"><a href="#!">1</a></li>
+                    <li class="waves-effect"><a href="#!">2</a></li>
+                    <li class="waves-effect"><a href="#!">3</a></li>
+                    <li class="waves-effect"><a href="#!">4</a></li>
+                    <li class="waves-effect"><a href="#!">5</a></li>
+                    <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                </ul>
+            </div>
+            <div id="reportSection" class="col s12">
+                Automated Reports
+            </div>
         </div>
     </div>
 
 
     <div id="targetUrlInfoContainer">
-        <div>
             <p class="flow-text">To avoid CORS problems it will be better to stay on the target url page.</p>
-        </div>
     </div>
 
-
     <div id="crawlFiverrContainer">
+            <div class="row">
                 <div class="col s12">
                     <div class="card  purple darken-4">
                         <div class="card-content white-text">
                             <span class="card-title" id="card-title">Title Comes Here</span>
-                            <p id="card-info" class="flow-text">I am a very simple card. I am good at containing small bits of information.
-                                I am convenient because I require little markup to use effectively.</p>
+                            <p id="card-info" class="flow-text">
+                                <br>.
+                                <br>.
+                                <br>.
+                                <br>.
+                                <br>.
+                                <br>.
+                                <br>.
+                                <br>.
+                            </p>
+                            <span id="savingInfo" style="float:right">Waiting...</span>
                         </div>
-                        <span class="badge blue white-text" id="savingInfo">Waiting</span>
                     </div>
                 </div>
+            </div>
 
             <div class="row">
                 <div class="col s3">
@@ -163,8 +227,8 @@
                         <div class="indeterminate"></div>
                     </div>
                 </div>
-                <div class="col s3">
-                <a class="waves-effect waves-light btn red disabled right" id="stopCrawlingButton" title="Stop Crawling & Quit Process"><i class="material-icons left">do_not_disturb_on</i>QUIT</a>
+                <div class="col s3 offset-s3 right-align">
+                <a class="waves-effect waves-light btn red disabled right-aligned" id="stopCrawlingButton" title="Stop Crawling & Quit Process"><i class="material-icons left">do_not_disturb_on</i>QUIT</a>
                 </div>
             </div>
     </div>
@@ -174,9 +238,6 @@
             <button id="test">FIREBASE TEST</button>
         </div>
     </div>
-
-
-
 
     <div class = "footer-copyright">
         <div class = "container">

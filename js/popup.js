@@ -9,7 +9,8 @@ state['failedURLz']=[];
 state['crawlStatusOrder']={continue:true};
 state['freshCategories']={refreshDate:minutesNow, categoryList:[]};
 state['firebaseConfig'] = {};
-
+state['countries']= ["Argentina", "Australia", "Bahrain", "Bangladesh", "Barbados", "Bosnia and Herzegovina", "Bulgaria", "Cameroon", "Canada", "China", "Colombia", "Croatia", "Cyprus", "Czech Republic", "Dominican Republic", "Ecuador", "Egypt", "France", "Germany", "Ghana", "Greece", "Hong Kong", "Hungary", "India", "Indonesia", "Ireland", "Israel", "Italy", "Kenya", "Lithuania", "Macedonia [FYROM]", "Malaysia", "Moldova", "Morocco", "Nepal", "Netherlands", "New Zealand", "Nigeria", "Norway", "Oman", "Pakistan", "Peru", "Philippines", "Poland", "Portugal", "Romania", "Russia", "Saudi Arabia", "Serbia", "Slovenia", "Spain", "Sri Lanka", "Suriname", "Sweden", "Switzerland", "Thailand", "Turkey", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Venezuela", "Vietnam", "Zambia"];
+state['languages'] =["Arabic", "Bengali", "Chinese", "Dutch", "English", "French", "German", "Gujarati", "Hebrew", "Hindi", "Italian", "Kannada", "Malayalam", "Marathi", "Oriya", "Persian", "Polish", "Portuguese", "Portuguese-BR", "Punjabi", "Russian", "Spanish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Urdu", "Vietnamese"];
 
 //if firebaseconfig is already saved local retrieve it and set the state. Also, write it to the textarea
 if(locSt.getItem('firebaseConfig')){
@@ -61,6 +62,9 @@ function saveGigToFireStore(gG){
     fF.db.collection('gigs').add(gG)
         .then(function() {
             document.querySelector('#savingInfo').textContent=`Saved!`; //savingInfo
+            window.setTimeout(()=>{
+                document.querySelector('#savingInfo').textContent=`Done!`; //savingInfo
+            },200)
         })
         .catch(function(error) {
             document.querySelector('#savingInfo').textContent=`Error!`;
@@ -70,8 +74,12 @@ function saveGigToFireStore(gG){
 
 
 function totalLoad(){
-    let settingsTabUl = document.querySelector('.tabs');
-    let settingsTab = M.Tabs.init(settingsTabUl);
+    let settingsTab = M.Tabs.init(document.querySelector('#settingTabs'));
+    let queryTab = M.Tabs.init(document.querySelector('#queryTabs'));
+    let datePicker = M.Datepicker.init(document.querySelectorAll('.datepicker'),{autoClose:true,format:'yyyy-mm-dd', }); //2020-05-10
+    //-first add countries to select options
+    addCountriesToSellerCountrySelect();
+    let allSelects = M.FormSelect.init(document.querySelectorAll('select'), {});
 
     document.querySelectorAll("[data-view]").forEach(item=>{
         state['viewList'][item.dataset.view]=item.dataset.caption;
@@ -115,6 +123,20 @@ function totalLoad(){
 }
 
 
+function addCountriesToSellerCountrySelect(){
+    //add country options to seller-country select
+    let sellerCountrySelect = document.querySelector('#filter_seller_country');
+    state.countries.forEach((countryName)=>{
+        let newOption = document.createElement('option');
+        newOption.textContent = countryName;
+        newOption.value = countryName;
+        sellerCountrySelect.add(newOption);
+    });
+}
+
+
+
+
 function getmeToTheCurrentURL(){
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
            m2c({value:`Current url is: ${tabs[0].url.toString()}`});
@@ -144,7 +166,7 @@ function hideAllContainers(exceptThat){
 
 
 function crawlData2Container(data){
-    document.querySelector('#card-title').textContent = data.seller_name;
+    document.querySelector('#card-title').innerHTML = `<b>${data.Category}</b>`;
     let otherInfo=``;
     Object.entries(data).forEach((entry)=>{
         otherInfo+=`<div><b>${entry[0]}</b>: ${entry[1]}</div>`;
@@ -244,22 +266,24 @@ async function returnMyJson(targetJSONurl,page){
 
         if (response.status !== 200) { state['failedURLz'].push(targetJSONurl); return new Promise(res=>{res(false)});}
 
-
-    jsonData.gigs.forEach((title)=>{
+    for(let title of jsonData.gigs){
         // FIREBASE
         saveGigToFireStore(title);
         //m2c({value:title});
         let tit = {
-            seller_name: title.seller_name,
-            gig_id: title.gig_id,
-            gig_created: title.gig_created,
-            gig_updated: title.gig_updated,
-            price: title.price,
-            url: targetJSONurl,
-            page: page
+            Seller_Name: title.seller_name,
+            Is_PRO: title.is_pro,
+            Seller_created: title.seller_created_at,
+            Gig_ID: title.gig_id,
+            Gig_created: title.gig_created,
+            Gig_updated: title.gig_updated,
+            Price: title.price,
+            Full_URL: targetJSONurl,
+            Category: targetJSONurl.split('/')[targetJSONurl.split('/').length-1],
+            PAGE: page
         };
         crawlData2Container(tit);
-    });
+    }
     //
     if(jsonData.next_page){
         return new Promise((res)=>{
