@@ -131,6 +131,7 @@ function totalLoad(){
 
     // getURL list
     document.querySelector('#getTheCategoryURLzButton').addEventListener('click',async ()=>{
+        document.querySelector('#urlList').innerHTML= loadingCircle();
         let fC = await getCategories();
         let divCreation = await urlDivCreator(fC);
     })
@@ -231,10 +232,24 @@ function stateModifier(keyValueObject){
     });
 }
 
+function loadingCircle(){
+    return `  <div class="preloader-wrapper big active center-block">
+    <div class="spinner-layer spinner-blue-only">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+  </div>`
+}
 
 function urlDivCreator(urlList){
-    document.querySelector('#urlList').innerHTML='';
+    document.querySelector('#urlList').innerHTML= loadingCircle();
     let orderNumber=0;
+    let cumulDiv=``;
     for(let oUrl of urlList){
         let poURL = oUrl.split("/");
         let fontSize = 14;
@@ -244,16 +259,16 @@ function urlDivCreator(urlList){
             oUrl = poURL[1] + "/" + poURL[2];
             fontSize = 12;
         }//<a class="waves-effect waves-light btn red"
-        let cumulDiv=`<div class="row cumulDiv" >
+        cumulDiv+=`<div class="row cumulDiv" id="processingURLdiv_${orderNumber}">
                         <div class="col s1 left-align">
                         ${orderNumber}
                         </div>
                         <div class="col s9" style="font-size: ${fontSize}px">  ${attachInfo} ${oUrl}</div>
                         <div class="col s2" id="processingURLPageNumber_${orderNumber}">pg:0</div>
                     </div>`;
-        document.querySelector('#urlList').innerHTML+=cumulDiv;
         orderNumber++;
     }
+    document.querySelector('#urlList').innerHTML=cumulDiv;
     return new Promise((res)=>{res(true)});
 }
 
@@ -269,7 +284,7 @@ const crawlIt = async function() {
     for(let trackNumber = orderNum; trackNumber< fC.length; trackNumber++) {
         if(!checkFirebaseConnection()){return false}
         if(!state.crawlStatusOrder.continue){
-            let quittingMessage =`Continuing process is about to complete, once done will quit!`;
+            let quittingMessage =`Continuing process is about to complete, wait for stable done!`;
             m2c({value:quittingMessage});
             M.toast({html:`<b>${quittingMessage}</b>`});
             break;
@@ -309,7 +324,8 @@ async function returnMyJson(targetJSONurl,page, orderNum){
     //m2c({value:jsonData});
 
         if (response.status !== 200) { state['failedURLz'].push(targetJSONurl); return new Promise(res=>{res(false)});}
-
+    document.querySelector('#processingURLdiv_'+orderNum).classList.add('cumulDivActive');
+    document.querySelector('#processingURLdiv_'+orderNum).classList.remove('cumulDiv');
     for(let title of jsonData.gigs){
         // FIREBASE
         saveGigToFireStore(title);
