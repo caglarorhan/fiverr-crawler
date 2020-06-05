@@ -77,7 +77,7 @@
                     </div>
                 </form>
             </div>
-            <div id="otherSettings" class="col s12">Test 4</div>
+            <div id="otherSettings" class="col s12">Other settings come here...</div>
         </div>
     </div>
 
@@ -186,7 +186,10 @@
                 </ul>
             </div>
             <div id="reportSection" class="col s12">
-                Automated Reports
+                <a class="waves-effect waves-light btn green" id="reportsButton" title="Begin to Crawl"><i class="material-icons right">directions_run</i>RUN</a>
+                <div id="reports">
+                    waiting....
+                </div>
             </div>
         </div>
     </div>
@@ -198,37 +201,26 @@
 
     <div id="crawlFiverrContainer">
             <div class="row">
-                <div class="col s12">
-                    <div class="card  purple darken-4">
-                        <div class="card-content white-text">
-                            <span class="card-title" id="card-title">Title Comes Here</span>
-                            <p id="card-info" class="flow-text">
-                                <br>.
-                                <br>.
-                                <br>.
-                                <br>.
-                                <br>.
-                                <br>.
-                                <br>.
-                                <br>.
-                            </p>
-                            <span id="savingInfo" style="float:right">Waiting...</span>
-                        </div>
-                    </div>
+                <div class="col s12" style="height: 300px; overflow-y: auto;" id="urlList">
+
+
+
+
                 </div>
+                <div class="col s12"><span id="savingInfo" style="float:right">Waiting...</span></div>
             </div>
 
             <div class="row">
                 <div class="col s3">
-                    <a class="waves-effect waves-light btn red" id="beginToCrawlButton" title="Begin to Crawl"><i class="material-icons right">directions_run</i>RUN</a>
+                    <a class="waves-effect waves-light btn red" id="beginToCrawlButton" title="Begin to Crawl">BEGIN FROM</a>
+
+                </div>
+                <div class="col s3">
+                    <input type="text" id="urlOrderNum" value="0" />
                 </div>
                 <div class="col s6">
-                    <div class="progress" style="display: none" id="crawlingProggressBar">
-                        <div class="indeterminate"></div>
-                    </div>
+                    <a class="waves-effect waves-light btn orange" id="getTheCategoryURLzButton" title="List all category urls">GET URL LIST</a>
                 </div>
-                <div class="col s3 offset-s3 right-align">
-                <a class="waves-effect waves-light btn red disabled right-aligned" id="stopCrawlingButton" title="Stop Crawling & Quit Process"><i class="material-icons left">do_not_disturb_on</i>QUIT</a>
                 </div>
             </div>
     </div>

@@ -7,6 +7,7 @@ state['tabData']='';
 state['viewList'] = {};
 state['failedURLz']=[];
 state['crawlStatusOrder']={continue:true};
+state['crawlStatusChangerButton'] = {position:true}
 state['freshCategories']={refreshDate:minutesNow, categoryList:[]};
 state['firebaseConfig'] = {};
 state['countries']= ["Argentina", "Australia", "Bahrain", "Bangladesh", "Barbados", "Bosnia and Herzegovina", "Bulgaria", "Cameroon", "Canada", "China", "Colombia", "Croatia", "Cyprus", "Czech Republic", "Dominican Republic", "Ecuador", "Egypt", "France", "Germany", "Ghana", "Greece", "Hong Kong", "Hungary", "India", "Indonesia", "Ireland", "Israel", "Italy", "Kenya", "Lithuania", "Macedonia [FYROM]", "Malaysia", "Moldova", "Morocco", "Nepal", "Netherlands", "New Zealand", "Nigeria", "Norway", "Oman", "Pakistan", "Peru", "Philippines", "Poland", "Portugal", "Romania", "Russia", "Saudi Arabia", "Serbia", "Slovenia", "Spain", "Sri Lanka", "Suriname", "Sweden", "Switzerland", "Thailand", "Turkey", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Venezuela", "Vietnam", "Zambia"];
@@ -26,7 +27,7 @@ if(locSt.getItem('firebaseConfig')){
     });
     //-----------------------------------------------
     state.firebaseConfig = confObj; //set state property  again
-    m2c({value:state.firebaseConfig});
+    //m2c({value:state.firebaseConfig});
 
     document.querySelector('#firebaseConfig').value = locSt.getItem('firebaseConfig');
     firebase.initializeApp(state.firebaseConfig); //init firebase with these configs
@@ -94,22 +95,26 @@ function totalLoad(){
     // Check and redirect to target url
     document.querySelector('#gotoTargetUrlButton').addEventListener('click',getmeToTheCurrentURL);
 
-    // Begin to crawl
+    // Begin/Quit to crawl
     document.querySelector('#beginToCrawlButton').addEventListener('click',()=>{
-        M.toast({html:'Crawl process will begin shortly!'});
-        document.querySelector('#crawlingProggressBar').style.display='block';
-        let crawling = crawlIt();
-        document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
-        document.querySelector('#stopCrawlingButton').classList.toggle('disabled');
-    });
+        if(state.crawlStatusChangerButton.position){
+            M.toast({html:'Crawl process will begin shortly!'});
+            state.crawlStatusOrder.continue = true;
+            let crawling = crawlIt();
+            state.crawlStatusChangerButton.position = false;
+            document.querySelector('#beginToCrawlButton').innerText = 'QUIT';
+            document.querySelector('#beginToCrawlButton').title = 'Quit from crawling!';
 
-    //Stop crawling
-    document.querySelector('#stopCrawlingButton').addEventListener('click',()=>{
-        M.toast({html:'Quitting from crawl process...'});
-        document.querySelector('#crawlingProggressBar').style.display='none';
-        state.crawlStatusOrder.continue=false;
-        document.querySelector('#beginToCrawlButton').classList.toggle('disabled');
-        document.querySelector('#stopCrawlingButton').classList.toggle('disabled');
+        }else{
+            M.toast({html:'Quitting from crawl process...'});
+            state.crawlStatusOrder.continue = false;
+            state.crawlStatusChangerButton.position = true;
+            document.querySelector('#beginToCrawlButton').innerText = 'BEGIN';
+            document.querySelector('#beginToCrawlButton').title = 'Begin to Crawl';
+        }
+        document.querySelector('#beginToCrawlButton').classList.toggle('red');
+        document.querySelector('#beginToCrawlButton').classList.toggle('green');
+
     });
 
     //firebaseConfigSaveButton
@@ -117,10 +122,31 @@ function totalLoad(){
         let confText = document.querySelector('#firebaseConfig').value;
         locSt.setItem('firebaseConfig',confText);
         M.toast({html:'Firebase configuration text saved into localStorage!'})
+    });
+
+    //reportsButton
+    document.querySelector('#reportsButton').addEventListener('click',()=>{
+        document.querySelector('#reports').innerHTML = gimmeReport();
     })
+
+    // getURL list
+    document.querySelector('#getTheCategoryURLzButton').addEventListener('click',async ()=>{
+        let fC = await getCategories();
+        let divCreation = await urlDivCreator(fC);
+    })
+
 
 // total load sonu
 }
+
+
+function gimmeReport(){
+    m2c({value:'Not tested because of quota problems.'});
+    // fF.db.collection('gigs').get().then(function(snapshot) {
+    //     //m2c({value:snapshot.doc.seller_name});
+    // });
+}
+
 
 
 function addCountriesToSellerCountrySelect(){
@@ -165,16 +191,6 @@ function hideAllContainers(exceptThat){
 }
 
 
-function crawlData2Container(data){
-    document.querySelector('#card-title').innerHTML = `<b>${data.Category}</b>`;
-    let otherInfo=``;
-    Object.entries(data).forEach((entry)=>{
-        otherInfo+=`<div><b>${entry[0]}</b>: ${entry[1]}</div>`;
-    });
-    document.querySelector('#card-info').innerHTML = otherInfo;
-
-}
-
 
 
 
@@ -213,7 +229,32 @@ function stateModifier(keyValueObject){
        state[key]=keyValueObject[key];
         M.toast({html:'State is modified...'});
     });
+}
 
+
+function urlDivCreator(urlList){
+    document.querySelector('#urlList').innerHTML='';
+    let orderNumber=0;
+    for(let oUrl of urlList){
+        let poURL = oUrl.split("/");
+        let fontSize = 14;
+        let attachInfo = '';
+        if(poURL.length>2){
+            attachInfo = ` <span title="Base category: ${poURL[0]}" style="cursor: pointer;"> ~ </span>`
+            oUrl = poURL[1] + "/" + poURL[2];
+            fontSize = 12;
+        }//<a class="waves-effect waves-light btn red"
+        let cumulDiv=`<div class="row cumulDiv" >
+                        <div class="col s1 left-align">
+                        ${orderNumber}
+                        </div>
+                        <div class="col s9" style="font-size: ${fontSize}px">  ${attachInfo} ${oUrl}</div>
+                        <div class="col s2" id="processingURLPageNumber_${orderNumber}">pg:0</div>
+                    </div>`;
+        document.querySelector('#urlList').innerHTML+=cumulDiv;
+        orderNumber++;
+    }
+    return new Promise((res)=>{res(true)});
 }
 
 
@@ -221,10 +262,11 @@ const crawlIt = async function() {
     if(!checkFirebaseConnection()){return false;}
     state.crawlStatusOrder.continue=true;
     let fC = await getCategories();
-    let cFL = fC.length;
-    let fCi = 0;
+    let divCreation = await urlDivCreator(fC); // urllerin divleri olusturuldu
+    let orderNum = document.querySelector('#urlOrderNum').value;
+    let divHeight = 25;
 
-    for (url2ndPart of fC) {
+    for(let trackNumber = orderNum; trackNumber< fC.length; trackNumber++) {
         if(!checkFirebaseConnection()){return false}
         if(!state.crawlStatusOrder.continue){
             let quittingMessage =`Continuing process is about to complete, once done will quit!`;
@@ -232,19 +274,21 @@ const crawlIt = async function() {
             M.toast({html:`<b>${quittingMessage}</b>`});
             break;
         }
-        let jsonJob = await getJSON('https://www.fiverr.com/categories/' + url2ndPart);
+        let url2ndPart = fC[trackNumber];
+        let jsonJob = await getJSON('https://www.fiverr.com/categories/' + url2ndPart, trackNumber);
+        document.querySelector('#urlList').scrollTo({top: divHeight*trackNumber , behavior: 'smooth'});
         m2c({value:`${url2ndPart} json dosyasi ${jsonJob}`});
     }
 
 };
 // Hedef json sayfasindan seller verilerini ceken kisim
 
-function getJSON(targetJSONurl){
+function getJSON(targetJSONurl,orderNum){
 
     return new Promise(async (resolve)=>{
         //--------------------------------------------
         for(let page=1; page<500;page++){
-            let donen = await returnMyJson(targetJSONurl, page);
+            let donen = await returnMyJson(targetJSONurl, page, orderNum);
             //m2c({value:`Donen durum:${donen}`});
             if(!state.crawlStatusOrder.continue){break;}
                if(!donen){break}
@@ -259,7 +303,7 @@ function getJSON(targetJSONurl){
     })
 }
 
-async function returnMyJson(targetJSONurl,page){
+async function returnMyJson(targetJSONurl,page, orderNum){
     let response = await fetch(targetJSONurl+'.json?page='+page);
     let jsonData = await response.json();
     //m2c({value:jsonData});
@@ -282,7 +326,9 @@ async function returnMyJson(targetJSONurl,page){
             Category: targetJSONurl.split('/')[targetJSONurl.split('/').length-1],
             PAGE: page
         };
-        crawlData2Container(tit);
+        // json bilgisinin yansitilma isini buradan halledecegiz
+        // ,orderNum
+        document.querySelector('#processingURLPageNumber_'+orderNum).textContent = `pg:${page}`;
     }
     //
     if(jsonData.next_page){
