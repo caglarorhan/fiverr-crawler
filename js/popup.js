@@ -173,7 +173,7 @@ function totalLoad(){
         locSt.setItem('orderQueueData','');
         let orderQueTotals = await urlRequester(fC);
         m2c({value:orderQueTotals});
-        orderQueTotals='CategoryURL','Category Total Queue Count, 5 Star Count, 4 Star Count, 3 Star Count, 2 Star Count, 1 Star Count' +'\n' +orderQueTotals;
+        orderQueTotals='CategoryURL,Category Total Queue Count, 5 Star Count, 4 Star Count, 3 Star Count, 2 Star Count, 1 Star Count' +'\n' +orderQueTotals;
         locSt.setItem('orderQueueData',orderQueTotals);
 
         pushToDownloadTextFile(orderQueTotals);
