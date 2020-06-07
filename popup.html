@@ -20,6 +20,7 @@
             <span id="currentPageCaption" style="text-align:center; font-weight:bold; margin:0 0 0 70px; padding:3px; font-size:16px; color:white; width:150px; max-width: 150px;">Wellcome!</span>
             <ul class="right" id="navUl">
                 <li title="Query Captured Data"><a href="#!" class="waves-effect waves-light black" id="queryCapturedDataButton" data-view="queryCapturedDataContainer"  data-caption="Query Data"><i class="material-icons">search</i></a></li>
+                <li title="Real Crawl"><a href="#!" class="waves-effect waves-light light-blue" id="realCrawlerButton" data-view="realCrawlerContainer"  data-caption="Real Crawl"><i class="material-icons">find_in_page</i></a></li>
                 <li title="Go to Fiverr/Categories Page"><a href="#!" class="waves-effect waves-light yellow" id="gotoTargetUrlButton" data-view="targetUrlInfoContainer"  data-caption="Target URL"><i class="material-icons">home</i></a></li>
                 <li title="Begin to crawl Fiverr"><a href="#!" class="waves-effect waves-light orange" id="crawlFiverrButton" data-view="crawlFiverrContainer" data-caption="Crawling Page"><i class="material-icons">cloud_download</i></a></li>
                 <li title="Settings"><a href="#!" class="waves-effect waves-light red" id="settingsButton" data-view="settingsContainer" data-caption="Settings"><i class="material-icons">settings</i></a></li>
@@ -40,6 +41,16 @@
     </div>
 
 
+    <div id="realCrawlerContainer">
+        <div class="center">
+
+            <p>Crawler</p>
+
+        </div>
+    </div>
+
+
+
     <div id="settingsContainer">
         <div class="row">
             <div class="col s12">
@@ -53,14 +64,14 @@
                 <form action="" class="col s12">
                     <div class="input-field col s12">
                         <label>
-                            <input type="checkbox" class="filled-in" checked="checked" />
+                            <input type="checkbox" class="filled-in" checked="checked" id="settingsConsoleStatus"/>
                             <span>Show gathering data on console</span>
                         </label>
                     </div>
                     <div class="input-field col s12">
                         <label>
-                            <input type="checkbox" class="filled-in" checked="checked" />
-                            <span>Show gathering data on crawl page card</span>
+                            <input type="checkbox" class="filled-in" checked="checked" id="settingsToastStatus"/>
+                            <span>Show messages on toast!</span>
                         </label>
                     </div>
                 </form>
@@ -141,8 +152,8 @@
                         <div class="input-field col s4">
                             <select id="filter_seller_country">
                                 <option value="" selected>Seller Country</option>
-                                <label for="filter_seller_country">Seller Country</label>
                             </select>
+                            <label for="filter_seller_country">Seller Country</label>
                         </div>
                     </div>
                     <div class="row">
@@ -186,11 +197,26 @@
                 </ul>
             </div>
             <div id="reportSection" class="col s12">
-                <a class="waves-effect waves-light btn green" id="reportsButton" title="Begin to Crawl"><i class="material-icons right">directions_run</i>RUN</a>
-                <div id="reports">
+                <a class="waves-effect waves-light btn green" id="reportsButton" title="Begin to Crawl"><i class="material-icons right">directions_run</i>ORDER QUEUES</a>
+                <span class="flow-text"> Processing seller:<span id="currentSellerName">...</span></span>
+                <div id="reports" style="height: 400px; overflow-y: auto;">
                     waiting....
                 </div>
+                <div class="fixed-action-btn">
+                    <a class="btn-floating btn-large red">
+                        <i class="large material-icons">mode_edit</i>
+                    </a>
+                    <ul>
+                        <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
+                        <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
+                        <li title="Download results as CSV file" id="reportsDownloadCsvFileButton"><a class="btn-floating green"><i class="material-icons">file_download</i></a></li>
+                        <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
+                    </ul>
+                </div>
             </div>
+
+
+        </div>
         </div>
     </div>
 
@@ -203,13 +229,10 @@
             <div class="row">
                 <div class="col s12" style="height: 300px; overflow-y: auto;" id="urlList">
 
-
-
-
                 </div>
                 <div class="col s12"><span id="savingInfo" style="float:right">Waiting...</span></div>
             </div>
-
+            <div id="tempStorage" style="height: 1px; width: 1px; visibility: hidden;"></div>
             <div class="row">
                 <div class="col s3">
                     <a class="waves-effect waves-light btn red" id="beginToCrawlButton" title="Begin to Crawl">BEGIN FROM</a>

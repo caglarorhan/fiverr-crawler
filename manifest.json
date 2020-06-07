@@ -38,6 +38,7 @@
   ],
   "permissions": [
     "storage",
+    "downloads",
     "activeTab",
     "tabs",
     "geolocation",

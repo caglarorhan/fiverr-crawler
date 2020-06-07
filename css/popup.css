@@ -34,3 +34,8 @@
 .cumulDivActive {
     font-size: 16px; color: darkred; background-color: lightyellow; margin-bottom: 0px !important; border-bottom:1px solid black;
 }
+
+
+.hideMe{
+    display: none;
+}
