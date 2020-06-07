@@ -173,7 +173,7 @@ function totalLoad(){
         locSt.setItem('orderQueueData','');
         let orderQueTotals = await urlRequester(fC);
         m2c({value:orderQueTotals});
-        orderQueTotals='Category Total Queue Count, 5 Star Count, 4 Star Count, 3 Star Count, 2 Star Count, 1 Star Count' +'\n' +orderQueTotals;
+        orderQueTotals='CategoryURL','Category Total Queue Count, 5 Star Count, 4 Star Count, 3 Star Count, 2 Star Count, 1 Star Count' +'\n' +orderQueTotals;
         locSt.setItem('orderQueueData',orderQueTotals);
 
         pushToDownloadTextFile(orderQueTotals);
@@ -198,7 +198,7 @@ function totalLoad(){
 async function urlRequester(fC){
     let totalUrlValues='';
     let divHeight = 25;
-    for(let orderNum=1; orderNum<2; orderNum++){ //her temel url buradan giriyor
+    for(let orderNum=0; orderNum<fC.length; orderNum++){ //her temel url buradan giriyor
         document.querySelector('#processingURLdiv_'+orderNum).classList.remove('cumulDiv');
         document.querySelector('#processingURLdiv_'+orderNum).classList.add('cumulDivActive');
         document.querySelector('#processingURLPageNumber_'+orderNum).textContent=`process`;
