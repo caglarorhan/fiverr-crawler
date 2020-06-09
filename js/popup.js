@@ -196,7 +196,7 @@ function totalLoad(){
 async function urlRequester(fC){
     let totalUrlValues='';
     let divHeight = 25;
-    for(let orderNum=317; orderNum<fC.length; orderNum++){ //her temel url buradan giriyor
+    for(let orderNum=0; orderNum<fC.length; orderNum++){ //her temel url buradan giriyor
         document.querySelector('#processingURLdiv_'+orderNum).classList.remove('cumulDiv');
         document.querySelector('#processingURLdiv_'+orderNum).classList.add('cumulDivActive');
         document.querySelector('#processingURLPageNumber_'+orderNum).textContent=`process`;
