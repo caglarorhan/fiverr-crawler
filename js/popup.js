@@ -55,24 +55,25 @@ totalLoad();
 });
 
 
-function saveGigToFireStore(gG){
+function saveGigToFireStore(gG,documentName,statusIndicatorId){
     if(!checkFirebaseConnection()){
         M.toast({html:`Firebase db couldn't initiate! Quitting`});
         state.firebaseConfig.continue =false;
         return false;
     }
-    fF.db.collection('gigs').add(gG)
+    fF.db.collection(documentName).add(gG)
         .then(function() {
-            document.querySelector('#savingInfo').textContent=`Saved!`; //savingInfo
+            document.querySelector('#'+statusIndicatorId).textContent=`Saved!`; //savingInfo
             window.setTimeout(()=>{
-                document.querySelector('#savingInfo').textContent=`Done!`; //savingInfo
+                document.querySelector('#'+statusIndicatorId).textContent=`Done!`; //savingInfo
             },200)
         })
         .catch(function(error) {
-            document.querySelector('#savingInfo').textContent=`Error!`;
+            document.querySelector('#'+statusIndicatorId).textContent=`Error!`;
             m2c({value:`Error happened: ${error}`})
         });
 }
+
 
 function pushToDownloadTextFile(ingredient){
     let blob = new Blob([ingredient], {type: "text/plain"});
@@ -170,12 +171,9 @@ function totalLoad(){
         document.querySelector('#reports').innerHTML= loadingCircle();
         let fC = await getCategories();
         let divCreation = await urlDivCreator(fC,'reports');
-        locSt.setItem('orderQueueData','');
         let orderQueTotals = await urlRequester(fC);
-        m2c({value:orderQueTotals});
-        orderQueTotals='CategoryURL,Category Total Queue Count, 5 Star Count, 4 Star Count, 3 Star Count, 2 Star Count, 1 Star Count' +'\n' +orderQueTotals;
+        orderQueTotals='DateCollected, Category URL, Gig URL, Seller Id, Seller Name, Order Que, 5 Star, 4 Star, 3 Star, 2 Star, 1 Star' +'\n' +orderQueTotals;
         locSt.setItem('orderQueueData',orderQueTotals);
-
         pushToDownloadTextFile(orderQueTotals);
     });
 
@@ -198,19 +196,19 @@ function totalLoad(){
 async function urlRequester(fC){
     let totalUrlValues='';
     let divHeight = 25;
-    for(let orderNum=0; orderNum<fC.length; orderNum++){ //her temel url buradan giriyor
+    for(let orderNum=317; orderNum<fC.length; orderNum++){ //her temel url buradan giriyor
         document.querySelector('#processingURLdiv_'+orderNum).classList.remove('cumulDiv');
         document.querySelector('#processingURLdiv_'+orderNum).classList.add('cumulDivActive');
         document.querySelector('#processingURLPageNumber_'+orderNum).textContent=`process`;
         document.querySelector('#reports').scrollTo({top: divHeight*orderNum , behavior: 'smooth'});
-        let urlData = await sumQueue('https://www.fiverr.com/categories/'+fC[orderNum]+'?ref=seller_level%3Atop_rated_seller');
-        m2c({value:fC[orderNum]});
-        m2c({value:urlData});
-        totalUrlValues+= fC[orderNum]+','+urlData.pagesTotalOrderQueue +','+urlData.starsTotal.toString()+'\n';
+        let urlData = await sumQueue('https://www.fiverr.com/categories/'+fC[orderNum]+'?ref=seller_level%3Atop_rated_seller', fC[orderNum], orderNum);
+        // m2c({value:fC[orderNum]});
+        // m2c({value:urlData});
+        totalUrlValues+=urlData.rowDataBatch;
         // toplamlari satirlara yazdir burada
         //{pagesTotalOrderQueue: pagesTotalOrderQueue, starsTotal: starsTotal }
         document.querySelector('#processingURLPageNumber_'+orderNum).textContent = urlData.pagesTotalOrderQueue;
-        document.querySelector('#processingURLPageNumber_'+orderNum).title = urlData.starsTotal;
+        document.querySelector('#processingURLPageNumber_'+orderNum).title = urlData.starsTotal.toString();
     }
 return new Promise(resolve=>{
     resolve(totalUrlValues)
@@ -219,37 +217,47 @@ return new Promise(resolve=>{
 
 
 
-async function sumQueue(targetHTMLurl){
+async function sumQueue(targetHTMLurl, categoryURL,orderNum){
+    let rowDataBatch=``;
     let pagesTotalOrderQueue = 0;
     let starsTotal = [0,0,0,0,0];
     //  url yi fetch et page=1 olarak request yap
-    m2c({value:'HEDEF: '+targetHTMLurl});
+    m2c({value:`
+    ------------------------(*)
+    KOK URL: ${targetHTMLurl}
+    ------------------------
+    `});
     for(let page=1; page<200; page++){
         let response = await fetch(targetHTMLurl+'&page='+page); // 48 gig ve altinda paging olan sayfa gelecek
-        if (response.status !== 200) {break;}
+        m2c({value:`Sunucu cevabi: ${response.status}`});
+        if (response.status !== 200) {page = 200; break;}
         let tempHTML = await response.text();
+        if(tempHTML.indexOf('error-page')>-1){page=200; break}
+        m2c({value:`URL:${targetHTMLurl+'&page='+page}`});
+        //m2c({value:tempHTML});
         //m2c({value:tempHTML})
         let tmp = JSON.parse(tempHTML.split('initialData.search_perseus = ')[1].split(';\n' +
             '  </script>')[0]);
-        if(!tmp.tracking.error){
+        if(tmp.listings && !tmp.tracking.error){
             // sayfa son sayfa degil devam
             let gigSize = tmp.listings[0].gigs.length;//48 donecek
+            if(gigSize<48){page=200}
             //m2c({value:gigSize})
             let gigsTotalOrderQueue=0;
             for(let order = 0; order<gigSize; order++){
                 let thisGigTotalOrderQueue = 0;
                 // gigs icindeki her nesne icin gig_url urlsine gidilecek
                 // "https://www.fiverr.com" + tmp.listings[0].gigs[order]
-                //m2c({value:"https://www.fiverr.com" + tmp.listings[0].gigs[order].gig_url});
+                m2c({value:tmp.listings[0].gigs[order].gig_url});
 
                 let gigPage = await (()=>{
                     return new Promise((resolve,reject)=>{
                         window.setTimeout(()=>{
                             resolve(fetch("https://www.fiverr.com" + tmp.listings[0].gigs[order].gig_url))
-                        },1000)
+                        },4000)
                     })
                 })();
-
+                m2c({value:`Gigpage Sunucu cevabi:${gigPage.status}`});
                 if(gigPage.status!==200){break;}
                 let pageSrc= await gigPage.text();
                 //m2c({value:pageSrc})
@@ -268,24 +276,44 @@ async function sumQueue(targetHTMLurl){
                         let starPointText = doc.querySelector(`table.stars-counters tr:nth-of-type(${star}) td.star-num`).textContent;
                         //m2c({value:starPointText});
                         let starPoint = parseInt(starPointText.replace(/"/g, "").replace(")","").replace("(","").replace(",",""));
-                        //m2c({value:starPoint});
+
                         starsTotal[star-1]+=starPoint;
                     }
+                    m2c({value:thisGigTotalOrderQueue +'/'+starsTotal.toString()});
                 }
 
                 gigsTotalOrderQueue+=thisGigTotalOrderQueue;
+                //add new gig data into csv
+                m2c({value:`Seller: ${tmp.listings[0].gigs[order].seller_name}`});
+                m2c({value:`Seller: ${tmp.listings[0].gigs[order].seller_id}`});
+            //adding data to csv here. CSV schema
+                let theDate = new Date();
+                let todayIs = `${theDate.getMonth()}/${theDate.getDate()}/${theDate.getFullYear()}`;
+                // DateCollected, Category URL,Targetted URL, Gig URL, Seller Id, Seller Name, 5 Star, 4 Star, 3 Star, 2 Star, 1 Star
+                rowDataBatch+= `${todayIs}, ${categoryURL}, ${tmp.listings[0].gigs[order].gig_url}, ${tmp.listings[0].gigs[order].seller_id}, ${tmp.listings[0].gigs[order].seller_name}, ${thisGigTotalOrderQueue}, ${starsTotal.toString()}`+'\n';
+                //firebase
+                let dailyIndividualGigQueueDataJson = {
+                    dateCollected: todayIs,
+                    categoryUrl: categoryURL,
+                    gigUrl: tmp.listings[0].gigs[order].gig_url,
+                    sellerId: tmp.listings[0].gigs[order].seller_id,
+                    sellerName: tmp.listings[0].gigs[order].seller_name,
+                    thisGigTotalOrderQueue: thisGigTotalOrderQueue,
+                    reviewStars: starsTotal
+                };
+                saveGigToFireStore(dailyIndividualGigQueueDataJson,'dailyIndividualGigQueueData','processingURLPageNumber_'+orderNum)
             }
             pagesTotalOrderQueue+=gigsTotalOrderQueue;
 
         }else{
-            break
+            page=200; break
         }
     }
     //
     return new Promise(resolve=>{
         window.setTimeout(()=>{
-            resolve({pagesTotalOrderQueue: pagesTotalOrderQueue, starsTotal: starsTotal })
-        },1000)
+            resolve({pagesTotalOrderQueue:pagesTotalOrderQueue, starsTotal:starsTotal, rowDataBatch:rowDataBatch})
+        },2000)
     })
 }
 
@@ -475,7 +503,7 @@ async function returnMyJson(targetJSONurl,page, orderNum){
     document.querySelector('#processingURLdiv_'+orderNum).classList.remove('cumulDiv');
     for(let title of jsonData.gigs){
         // FIREBASE
-        saveGigToFireStore(title);
+        saveGigToFireStore(title,'gigs','savingInfo');
         //m2c({value:title});
         let tit = {
             Seller_Name: title.seller_name,
