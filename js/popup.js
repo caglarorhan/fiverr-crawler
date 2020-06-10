@@ -8,9 +8,10 @@ state['viewList'] = {};
 state['failedURLz']=[];
 state['crawlStatusOrder']={continue:true};
 state['crawlStatusChangerButton'] = {position:true};
-state['freshCategories']={refreshDate:minutesNow, categoryList:[]};
+state['freshCategories']={refreshDate:minutesNow, categoryList:[], bestBefore:60};
 state['firebaseConfig'] = {};
 state['settings']={console:true, toast:true};
+state['sellerLevels']={"level_one_seller": {title: "Level One", switch:false}, "level_two_seller": {title:"level Two", switch: false}, "na": {title:"New Seller", switch:false}, "top_rated_seller":{title: "Top Rated", switch:false}};
 state['countries']= ["Argentina", "Australia", "Bahrain", "Bangladesh", "Barbados", "Bosnia and Herzegovina", "Bulgaria", "Cameroon", "Canada", "China", "Colombia", "Croatia", "Cyprus", "Czech Republic", "Dominican Republic", "Ecuador", "Egypt", "France", "Germany", "Ghana", "Greece", "Hong Kong", "Hungary", "India", "Indonesia", "Ireland", "Israel", "Italy", "Kenya", "Lithuania", "Macedonia [FYROM]", "Malaysia", "Moldova", "Morocco", "Nepal", "Netherlands", "New Zealand", "Nigeria", "Norway", "Oman", "Pakistan", "Peru", "Philippines", "Poland", "Portugal", "Romania", "Russia", "Saudi Arabia", "Serbia", "Slovenia", "Spain", "Sri Lanka", "Suriname", "Sweden", "Switzerland", "Thailand", "Turkey", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Venezuela", "Vietnam", "Zambia"];
 state['languages'] =["Arabic", "Bengali", "Chinese", "Dutch", "English", "French", "German", "Gujarati", "Hebrew", "Hindi", "Italian", "Kannada", "Malayalam", "Marathi", "Oriya", "Persian", "Polish", "Portuguese", "Portuguese-BR", "Punjabi", "Russian", "Spanish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Urdu", "Vietnamese"];
 
@@ -85,6 +86,9 @@ function pushToDownloadTextFile(ingredient){
 }
 
 
+//?ref=seller_level%3Atop_rated_seller%2Clevel_two_seller%7Cseller_language%3Aen%2Cur%2Cbn%7Cseller_location%3ACA%2CDE%2CUS
+//?ref=seller_level:top_rated_seller,level_two_seller|seller_language:en,ur,bn|seller_location:CA,DE,US
+
 
 function totalLoad(){
     let settingsTab = M.Tabs.init(document.querySelector('#settingTabs'));
@@ -93,6 +97,16 @@ function totalLoad(){
     //-first add countries to select options
     addCountriesToSellerCountrySelect();
     let allSelects = M.FormSelect.init(document.querySelectorAll('select'), {});
+    // modal initiate
+    let modals = M.Modal.init(document.querySelectorAll('.modal'), {});
+    //floating button init
+    let floatingButtons = M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'), {
+        direction: 'left',
+        hoverEnabled: false
+    });
+    //
+
+
 
     document.querySelectorAll("[data-view]").forEach(item=>{
         state['viewList'][item.dataset.view]=item.dataset.caption;
@@ -177,20 +191,60 @@ function totalLoad(){
         pushToDownloadTextFile(orderQueTotals);
     });
 
-    //floating button init
-    let instances = M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'), {
-        direction: 'left',
-        hoverEnabled: false
-    });
 
     // reports floating button click
     document.querySelector('#reportsDownloadCsvFileButton').addEventListener('click',()=>{
         pushToDownloadTextFile(locSt.getItem('orderQueueData'));
-    })
+    });
+
+    //CrawlSetting Div
+    //crawlSettingsDiv
+    let cSetDiv = document.querySelector('#crawlSettingsDiv');
+    let aRow = gimmeAnElement('div',12);
+    let aForm = gimmeAnElement('form',12,['col','s12']);
+    aRow.append(aForm);
+    cSetDiv.append(aRow);
+    let formRow = gimmeAnElement('div',12);
+    aForm.append(formRow);
+    //
+    Object.entries(state.sellerLevels).forEach(([key,val])=>{
+        formRow.innerHTML += `
+        <label>
+            <input type="checkbox" class="filled-in" id="sellerLevel_${val.value}" value="${key}" ${!val.switch?'':'checked="checked"'}"/>
+            <span>${val.title}</span>
+        </label>`;
+    });
+
+    getCategories().then(resolve=>{
+        let autoCompleteCategoryDataSource = Object.fromEntries(new Map(state.freshCategories.categoryList.map(item=>[item,null])));
+        //m2c({value:autoCompleteCategoryDataSource});
+        let autoCompleteCategoryList = M.Autocomplete.init(document.querySelector('#beginningCategoryInput'), {data:autoCompleteCategoryDataSource, onAutocomplete:()=>{
+            // couldnt got because of promise
+            }});
+       resolve(true)
+    });
+
+    //crawlsettings button
+    document.querySelector('#crawlSettingsButton').addEventListener('click',()=>{
+
+        });
+
 
 
 // total load sonu
 }
+
+
+
+
+
+function gimmeAnElement(tagName='div', gridSize=12, classes=['row']){
+    let newDiv = document.createElement(tagName);
+    classes.push('s'+gridSize);
+    newDiv.classList.add(...classes);
+    return newDiv;
+}
+
 
 
 async function urlRequester(fC){
@@ -340,7 +394,7 @@ function addCountriesToSellerCountrySelect(){
 function getmeToTheCurrentURL(){
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
            m2c({value:`Current url is: ${tabs[0].url.toString()}`});
-        if(tabs[0].url.toString()==='https://www.fiverr.com/categories'){
+        if(tabs[0].url.toString().indexOf('fiverr.com')>-1){
             M.toast({html: 'You are already there, crawl it with the <i class="material-icons">cloud_download</i>icon on the menu!'});
         }else{
             chrome.tabs.update({url: "https://www.fiverr.com/categories"});
@@ -402,7 +456,7 @@ chrome.runtime.onMessage.addListener((request,sender, sendResponse)=>{
 function stateModifier(keyValueObject){
     Object.keys(keyValueObject).forEach((key)=>{
        state[key]=keyValueObject[key];
-        M.toast({html:'State is modified...'});
+        //M.toast({html:'State is modified...'});
     });
 }
 
@@ -424,7 +478,9 @@ function urlDivCreator(urlList,targetDivId){
     document.querySelector('#'+targetDivId).innerHTML= loadingCircle();
     let orderNumber=0;
     let cumulDiv=``;
+    //m2c({value:urlList});
     for(let oUrl of urlList){
+        //m2c({value:oUrl})
         let poURL = oUrl.split("/");
         let fontSize = 14;
         let attachInfo = '';
@@ -535,21 +591,52 @@ async function returnMyJson(targetJSONurl,page, orderNum){
     }
 }
 
-
-
-
-
-
+let initCategories = getCategories();
 
 async function getCategories(){
     let minutesNow = Math.floor(new Date().getTime() / 60000);
-    m2c({action:'runRequest', value:'fetchCategories', callBack:'stateModifier'});
+    if(state && (minutesNow-state.freshCategories.refreshDate)<state.freshCategories.bestBefore){
+        return await new Promise(resolve=>{
+                resolve(state.freshCategories.categoryList);
+        });
+    }
+
+    let fetchPage = await (()=>{
+        return new Promise((resolve,reject)=>{
+            window.setTimeout(()=>{
+                resolve(fetch("https://www.fiverr.com/categories"))
+            },4000)
+        })
+    })();
+    let pageSrc= await fetchPage.text();
+    //m2c({value:pageSrc});
+    let domParser = new DOMParser();
+    let doc = domParser.parseFromString(pageSrc, "text/html");
+    let boxes = doc.querySelectorAll('.sitemap-box');
+    let fullCategories =[];
+    boxes.forEach((box)=>{
+        box.querySelectorAll('.mp-categories-columns.cf').forEach((subcat)=>{
+            subcat.querySelectorAll('li > a').forEach((scl)=>{
+                //m2c({value:scl.href});
+                let clearUrlPart = scl.href.toString().split("/categories/")[1];
+                //m2c({value:clearUrlPart});
+                if(clearUrlPart!==null && clearUrlPart!==undefined && clearUrlPart!=='') fullCategories.push(clearUrlPart)
+                //
+            })
+        })
+    });
+
+    stateModifier({'freshCategories':{refreshDate:minutesNow, categoryList:fullCategories}});
+    //m2c({value:state.freshCategories.categoryList});
     return await new Promise(resolve=>{
         setTimeout(()=>{
             resolve(state.freshCategories.categoryList);
-            },4000);
+        },1000);
     });
 }
+
+
+
 //
 
 

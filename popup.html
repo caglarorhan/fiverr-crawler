@@ -42,10 +42,43 @@
 
 
     <div id="realCrawlerContainer">
-        <div class="center">
-
-            <p>Crawler</p>
-
+            <div class="row"> Current under processing gig seller name:<span id="currentSellerName">...</span></div>
+            <div id="reports" style="height: 400px; overflow-y: auto; width: 100%;">
+                waiting....
+            </div>
+            <div class="fixed-action-btn">
+                <a class="btn-floating btn-large red pulse">
+                    <i class="large material-icons">build</i>
+                </a>
+                <ul>
+                    <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
+                    <li><a class="btn-floating yellow darken-1 modal-trigger" data-target="crawlSettings" id="crawlSettingsButton"><i class="material-icons">thumbs_up_down</i></a></li>
+                    <li title="Download results as CSV file" id="reportsDownloadCsvFileButton"><a class="btn-floating green pulse"><i class="material-icons">file_download</i></a></li>
+                    <li><a class="btn-floating blue" id="reportsButton" title="Begin to Crawl"><i class="material-icons">directions_run</i></a></li>
+                </ul>
+            </div>
+        <!-- Modal Structure -->
+        <div id="crawlSettings" class="modal">
+            <div class="modal-content">
+               <div class="">
+                   <div class="col s12" id="crawlSettingsDiv">
+                       <h5>Crawl Settings</h5>
+                       <div class="row">
+                           <div class="col s12">
+                               <div class="row">
+                                   <div class="input-field col s12">
+                                       <input type="text" id="beginningCategoryInput" class="autocomplete">
+                                       <label for="beginningCategoryInput">Beginning Category</label>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
         </div>
     </div>
 
@@ -197,22 +230,7 @@
                 </ul>
             </div>
             <div id="reportSection" class="col s12">
-                <a class="waves-effect waves-light btn green" id="reportsButton" title="Begin to Crawl"><i class="material-icons right">directions_run</i>ORDER QUEUES</a>
-                <span class="flow-text"> Processing seller:<span id="currentSellerName">...</span></span>
-                <div id="reports" style="height: 400px; overflow-y: auto;">
-                    waiting....
-                </div>
-                <div class="fixed-action-btn">
-                    <a class="btn-floating btn-large red">
-                        <i class="large material-icons">mode_edit</i>
-                    </a>
-                    <ul>
-                        <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
-                        <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
-                        <li title="Download results as CSV file" id="reportsDownloadCsvFileButton"><a class="btn-floating green"><i class="material-icons">file_download</i></a></li>
-                        <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
-                    </ul>
-                </div>
+                layout changed, here will automated reports later
             </div>
 
 
