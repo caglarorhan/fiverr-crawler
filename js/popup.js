@@ -90,7 +90,7 @@ function pushToDownloadTextFile(ingredient){
 //?ref=seller_level:top_rated_seller,level_two_seller|seller_language:en,ur,bn|seller_location:CA,DE,US
 
 
-function totalLoad(){
+async function totalLoad(){
     let settingsTab = M.Tabs.init(document.querySelector('#settingTabs'));
     let queryTab = M.Tabs.init(document.querySelector('#queryTabs'));
     let datePicker = M.Datepicker.init(document.querySelectorAll('.datepicker'),{autoClose:true,format:'yyyy-mm-dd', }); //2020-05-10
@@ -154,6 +154,7 @@ function totalLoad(){
     document.querySelector('#getTheCategoryURLzButton').addEventListener('click',async ()=>{
         document.querySelector('#urlList').innerHTML= loadingCircle();
         let fC = await getCategories();
+        m2c({value:fC})
         let divCreation = await urlDivCreator(fC,'urlList');
     });
 
@@ -215,14 +216,14 @@ function totalLoad(){
         </label>`;
     });
 
-    getCategories().then(resolve=>{
+    let getCategoriesCall = await getCategories();
+
         let autoCompleteCategoryDataSource = Object.fromEntries(new Map(state.freshCategories.categoryList.map(item=>[item,null])));
         //m2c({value:autoCompleteCategoryDataSource});
         let autoCompleteCategoryList = M.Autocomplete.init(document.querySelector('#beginningCategoryInput'), {data:autoCompleteCategoryDataSource, onAutocomplete:()=>{
-            // couldnt got because of promise
+                // couldnt got because of promise
             }});
-       resolve(true)
-    });
+
 
     //crawlsettings button
     document.querySelector('#crawlSettingsButton').addEventListener('click',()=>{
@@ -591,15 +592,17 @@ async function returnMyJson(targetJSONurl,page, orderNum){
     }
 }
 
-let initCategories = getCategories();
 
 async function getCategories(){
+    m2c({value:'getcategories fired'});
     let minutesNow = Math.floor(new Date().getTime() / 60000);
-    if(state && (minutesNow-state.freshCategories.refreshDate)<state.freshCategories.bestBefore){
-        return await new Promise(resolve=>{
-                resolve(state.freshCategories.categoryList);
-        });
-    }
+    // TODO:'Category list fressness mantigi hatali debug edilecek'
+    // if(state && (minutesNow-state.freshCategories.refreshDate)<state.freshCategories.bestBefore){
+    //     m2c({value:'state.freshCategories daha taze, yeniden cekilmeyecek'})
+    //     return new Promise(resolve=>{
+    //             resolve(state.freshCategories.categoryList);
+    //     });
+    // }
 
     let fetchPage = await (()=>{
         return new Promise((resolve,reject)=>{
