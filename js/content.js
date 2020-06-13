@@ -20,28 +20,3 @@ chrome.runtime.onMessage.addListener(  (request,sender, sendResponse)=>{
     return true;
 });
 
-class BridgeCxP {
-    constructor() {
-        this.send = chrome.runtime.sendMessage({v:'', action:null, callbackName:null},()=>{});
-        this.recieve=chrome.runtime.onMessage.addListener((r,s,sR)=>{
-            switch (r.action) {
-                case 'run':
-                    window[r.v]();
-                    if(r.callbackName){
-                        
-                    }
-                    break;
-                case 'test':
-                    break;
-                default:
-                    this.msgs.push({v:r.v, read:false});
-                    break;
-            }
-        });
-        this.msgs = []; // [{v:'message', read:false}]
-    }
-    get msg(){
-        return this.msgs[this.msgs.length-1].v;
-    }
-
-}
